@@ -1,24 +1,29 @@
 package com.huy.springboot.classmanagement.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
-import com.huy.springboot.classmanagement.services.ClassroomService;
-import com.huy.springboot.classmanagement.services.CourseService;
-import com.huy.springboot.classmanagement.services.UserService;
-
-@RestController
+@Controller
 public class MainController {
 
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private CourseService courseService;
-    
-    @Autowired
-    private ClassroomService classroomService;
-    
-    
-    
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
+    @GetMapping("/admin") 
+    public String admin() {
+        return "admin";
+    }
+
+    @GetMapping("/403")
+    public String accessDenied() {
+        return "403";
+    }
+
+    @GetMapping("/login") 
+    public String getLogin() {
+        return "login";
+    }
+
 }

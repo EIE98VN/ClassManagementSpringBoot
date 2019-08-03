@@ -66,7 +66,6 @@ public class Classroom {
     }
 
     @Basic
-    @NotNull
     @Column(name = "startTime")
     public LocalDateTime getTime() {
         return time;

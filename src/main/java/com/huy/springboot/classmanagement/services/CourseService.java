@@ -52,11 +52,22 @@ public class CourseService {
             if (classroom.getCourseId() == course.getId() && classroom.isStatus())
                 return false;
         }
+        for (Classroom classroom : classrooms) {
+            if(classroom.getCourseId()==course.getId()) {
+                classroomRepository.delete(classroom);
+            }                
+        }
         courseRepository.delete(course);
         return true;
     }
     
     public void deleteWithoutHesitation(final Course course) {
+        List<Classroom> classrooms = classroomRepository.findAll();
+        for (Classroom classroom : classrooms) {
+            if(classroom.getCourseId()==course.getId()) {
+                classroomRepository.delete(classroom);
+            }                
+        }
         courseRepository.delete(course);
     }
 

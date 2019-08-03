@@ -41,11 +41,22 @@ public class UserService {
                     && classroom.isStatus())
                 return false;
         }
+        for (Classroom classroom : classrooms) {
+            if(classroom.getKidId()==user.getId()||classroom.getTeacherId()==user.getId()) {
+                classroomRepository.delete(classroom);
+            }                
+        }
         userRepository.delete(user);
         return true;
     }
 
     public void deleteWithoutHesitation(final User user) {
+        List<Classroom> classrooms = classroomRepository.findAll();
+        for (Classroom classroom : classrooms) {
+            if(classroom.getKidId()==user.getId()||classroom.getTeacherId()==user.getId()) {
+                classroomRepository.delete(classroom);
+            }                
+        }
         userRepository.delete(user);
     }
 

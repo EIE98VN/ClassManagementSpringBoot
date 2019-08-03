@@ -1,6 +1,11 @@
 package com.huy.springboot.classmanagement.controllers;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -12,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huy.springboot.classmanagement.models.Classroom;
+import com.huy.springboot.classmanagement.models.KidClass;
 import com.huy.springboot.classmanagement.services.ClassroomService;
 
 @RestController
@@ -20,12 +26,15 @@ public class ClassroomController {
     @Autowired
     private ClassroomService classroomService;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @RequestMapping(value = "/classrooms", //
             method = RequestMethod.GET, //
             produces = { MediaType.APPLICATION_JSON_VALUE, //
                     MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public List<Classroom> getCourses() {
+    public List<Classroom> getClassrooms() {
         List<Classroom> list = classroomService.findAll();
         return list;
     }
@@ -44,8 +53,8 @@ public class ClassroomController {
             produces = { MediaType.APPLICATION_JSON_VALUE, //
                     MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public void addUser(@RequestBody Classroom classroom) {
-        classroomService.save(classroom);
+    public boolean addClassroom(@RequestBody Classroom classroom) {
+        return classroomService.save(classroom);
     }
 
     @RequestMapping(value = "/classroom", //
@@ -53,16 +62,59 @@ public class ClassroomController {
             produces = { MediaType.APPLICATION_JSON_VALUE, //
                     MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public void updateUser(@RequestBody Classroom classroom) {
-        classroomService.update(classroom);
+    public boolean updateClassroom(@RequestBody Classroom classroom) {
+        return classroomService.update(classroom);
     }
 
     @RequestMapping(value = "/classroom/{id}", //
             method = RequestMethod.DELETE, //
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public boolean deleteCourse(@PathVariable("id") int id) {
+    public boolean deleteClassroom(@PathVariable("id") int id) {
         Classroom classroom = classroomService.findById(id);
         return classroomService.delete(classroom);
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    @RequestMapping(value = "/classroom/kid/{id}", //
+            method = RequestMethod.GET, //
+            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @ResponseBody
+    public List<KidClass> getKidClassroom(@PathVariable("id") int id) {
+        ArrayList<KidClass> lists = new ArrayList<KidClass>();
+        TypedQuery<String> query = (TypedQuery<String>) entityManager
+                .createQuery("Select name from Course where id in (select courseId from Classroom where kidId= :id)");
+        query.setParameter("id", id);
+        List<String> courseName = query.getResultList();
+        query = (TypedQuery<String>) entityManager
+                .createQuery("Select name from User where id in (select teacherId from Classroom where kidId= :id)");
+        query.setParameter("id", id);
+        List<String> teacherName = query.getResultList();
+
+        for (int i = 0; i < courseName.size(); i++) {
+            KidClass kidClass = new KidClass(courseName.get(i), teacherName.get(i));
+            lists.add(kidClass);
+        }
+        return lists;
+    }
+
+    @RequestMapping(value = "/classroom/minute/{minute}", //
+            method = RequestMethod.GET, //
+            produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @ResponseBody
+    public List<Classroom> getClassroomsBeforeTime(@PathVariable("minute") long minute) {
+        LocalDateTime now = LocalDateTime.now();
+        if(now.getHour()<12) {
+            now = now.plusHours(12);
+        }
+        List<Classroom> lists = new ArrayList<Classroom>();
+        List<Classroom> classrooms = classroomService.findAll();
+        for (Classroom classroom : classrooms) {
+            if (classroom.isStatus() || (!classroom.getTime().isBefore(now)
+                    && !now.plusMinutes(minute).isBefore(classroom.getTime()))) {
+                lists.add(classroom);
+            }
+        }
+        return lists;
     }
 }

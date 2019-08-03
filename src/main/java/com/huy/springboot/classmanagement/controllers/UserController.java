@@ -25,7 +25,7 @@ public class UserController {
             produces = { MediaType.APPLICATION_JSON_VALUE, //
                     MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public List<User> getCourses() {
+    public List<User> getUsers() {
         List<User> list = userService.findAll();
         return list;
     }
@@ -61,7 +61,7 @@ public class UserController {
             method = RequestMethod.DELETE, //
             produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
     @ResponseBody
-    public boolean deleteCourse(@PathVariable("id") int id) {
+    public boolean deleteUser(@PathVariable("id") int id) {
         User user = userService.findById(id);
         return userService.delete(user);
     }
